@@ -1,0 +1,79 @@
+<html>
+<body>
+
+<script src="nem-sdk.js"></script>
+
+<script>
+  // Include the library
+  var nem = require("nem-sdk").default;
+  console.log(nem);
+</script>
+
+<div>
+  <h1>
+    Simple brain-wallet creation/inspection tool.
+  </h1>
+</div>
+
+<div>
+  Please don't use brain wallets. This tool should demonstrate how easy it is for an attacker to steal your funds:
+  <ul>
+    <li>Step 1: guess a password and enter it below</li>
+    <li>Step 2: copy the private key and use it to create a new private key wallet</li>
+    <li>Step 3: steal all funds</li> 
+  </ul>
+</div>
+
+<div>
+  (The keys are derived from given password on the client only using <a href="https://github.com/QuantumMechanics/NEM-sdk">nem-sdk</a> library. It should be safe to use this tool to recover your private key if you only remember a brain wallet password. Then transfer your funds to simple wallet immediatelly!)
+</div>
+
+<div style="padding-top:20px;padding-bottom:20px;">
+  <div>
+    Input your password here:<br>
+    <textarea id="inputPassword" rows=5 cols=80 wrap=on onkeyup="createbrainwallet()"></textarea>
+  </div>
+  <div>
+    Account data derived from given password:<br>
+    <textarea id="outputAccount" rows=5 cols=80 wrap=on readonly></textarea>
+  </div>
+</div>
+
+<script>
+    var delay = (function(){
+      var timer = 0;
+      return function(callback, ms){
+        clearTimeout (timer);
+        timer = setTimeout(callback, ms);
+      };
+    })();
+    
+    var textareaPass = document.getElementById("inputPassword");
+    var textareaAcc = document.getElementById("outputAccount");
+    function createbrainwallet() {
+      return delay(createbrainwalletInner, 666);
+    }
+    
+    function createbrainwalletInner() {
+    
+      //inspired directly in nem-sdk.js
+      var passphrase = textareaPass.value;
+      var network = nem.model.network.data.mainnet.id;
+      var privateKey = nem.crypto.helpers.derivePassSha(passphrase, 6000).priv;
+      var kp = nem.crypto.keyPair.create(privateKey);
+      var addr = nem.model.address.toAddress(kp.publicKey.toString(), network);
+      
+      textareaAcc.value = "Address: " + addr + "\nPrivate Key: " + privateKey + "\nPublic Key: " + kp.publicKey.toString();
+      document.getElementById("nembex").innerHTML = "<a href ='http://chain.nem.ninja/#/search/" + addr + "' target='nembexFrame'>" + addr + "</a>";
+      
+    }
+</script>
+
+<div id="nembex">
+</div>
+
+<iframe name="nembexFrame" id="nembexFrame" src="http://chain.nem.ninja/" width = "100%" height="100%" style="overflow:scroll;">
+</iframe>
+
+</body>
+</html>
